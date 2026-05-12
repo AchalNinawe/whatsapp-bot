@@ -1,4 +1,5 @@
 const express = require("express");
+const twilio = require("twilio");
 
 const app = express();
 
@@ -6,59 +7,54 @@ app.use(express.urlencoded({ extended: false }));
 
 app.post("/webhook", (req, res) => {
 
-    const msg = (req.body.Body || "").toLowerCase();
+    const incomingMsg = (req.body.Body || "").toLowerCase();
 
-    res.set('Content-Type', 'text/xml');
+    const twiml = new twilio.twiml.MessagingResponse();
 
-    if(msg === "hi"){
+    if (incomingMsg === "hi") {
 
-        res.send(`
-<Response>
-<Message>
-Welcome 👋
+        twiml.message(
+`Welcome 👋
 
-Type:
+Choose option:
+
+👉 Reply with:
 Freelook
 or
-Claims
-</Message>
-</Response>
-`);
+Claims`
+        );
+
     }
 
-    else if(msg === "freelook"){
+    else if (incomingMsg === "freelook") {
 
-        res.send(`
-<Response>
-<Message>
-Freelook request submitted successfully ✅
-</Message>
-</Response>
-`);
+        twiml.message("Freelook request submitted successfully ✅");
+
     }
 
-    else if(msg === "claims"){
+    else if (incomingMsg === "claims") {
 
-        res.send(`
-<Response>
-<Message>
-Claim registered successfully ✅
-</Message>
-</Response>
-`);
+        twiml.message("Claim registered successfully ✅");
+
     }
 
-    else{
+    else {
 
-        res.send(`
-<Response>
-<Message>
-Please type Hi
-</Message>
-</Response>
-`);
+        twiml.message("Please type Hi");
+
     }
+
+    res.writeHead(200, { "Content-Type": "text/xml" });
+    res.end(twiml.toString());
 
 });
 
-app.listen(process.env.PORT || 3000);
+app.get("/", (req, res) => {
+    res.send("WhatsApp Bot Running ✅");
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
