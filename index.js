@@ -13,7 +13,11 @@ app.post("/queryPolicy", async (req, res) => {
         console.log("BODY:", req.body);
 
         const policyNumber =
-            String(req.body.policyNumber || "").trim();
+    String(
+        req.body.policyNumber ||
+        req.body.policyNo ||
+        ""
+    ).trim();
 
         console.log("Policy Number:", policyNumber);
 
