@@ -92,7 +92,7 @@ app.post("/freelook", async (req, res) => {
             "https://portal.insuremo.com/api/platform/1.0/v1/flow/FreeLookTrad",
             {
                 policyNumber: policyNumber,
-                effectiveDate: new Date().toISOString(),
+                effectiveDate: effectiveDate: new Date().toISOString().replace("Z", "").split(".")[0],
                 freelookInput: {
                     freelookReason: 1,
                     alteredCoverages: []
