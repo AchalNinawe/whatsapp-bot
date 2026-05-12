@@ -143,6 +143,73 @@ app.post("/freelook", async (req, res) => {
 
 });
 
+app.post("/freelookQuotation", async (req, res) => {
+
+    try {
+
+        const policyNumber =
+            String(
+                req.body.policyNumber ||
+                req.body.policyNo ||
+                ""
+            ).trim();
+
+        const response = await axios.post(
+            "https://portal.insuremo.com/api/platform/1.0/v1/flow/FreelookRefundQuotation",
+            {
+                policyNumber: policyNumber,
+                effectiveDate: new Date()
+                    .toISOString()
+                    .replace("Z", "")
+                    .split(".")[0],
+                freelookInput: {
+                    freelookReason: 1,
+                    alteredCoverages: []
+                }
+            },
+            {
+                headers: {
+                    "Authorization":
+                        "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        console.log(
+            "FREELOOK QUOTATION RESPONSE:",
+            JSON.stringify(response.data, null, 2)
+        );
+
+        const data = response.data;
+
+        res.json({
+            result: data.result,
+            totalCoverageRefund:
+                data.totalCoverageRefund,
+            totalAdminFee:
+                data.totalAdminFee,
+            totalRefundAmount:
+                data.totalRefundAmount
+        });
+
+    } catch (err) {
+
+        console.log(
+            "FREELOOK QUOTATION ERROR:",
+            err.response?.data || err.message
+        );
+
+        res.status(500).json({
+            error:
+                err.response?.data ||
+                "Freelook Quotation API Failed"
+        });
+
+    }
+
+});
+
 app.get("/", (req, res) => {
     res.send("Insurance Bot Running ✅");
 });
