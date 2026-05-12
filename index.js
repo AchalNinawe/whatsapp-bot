@@ -1,60 +1,63 @@
 const express = require("express");
-const twilio = require("twilio");
+const axios = require("axios");
 
 const app = express();
 
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
-app.post("/webhook", (req, res) => {
+app.post("/queryPolicy", async (req, res) => {
 
-    const incomingMsg = (req.body.Body || "").toLowerCase();
+    try {
 
-    const twiml = new twilio.twiml.MessagingResponse();
+        const policyNumber = req.body.policyNumber;
 
-    if (incomingMsg === "hi") {
-
-        twiml.message(
-`Welcome 👋
-
-Choose option:
-
-👉 Reply with:
-Freelook
-or
-Claims`
+        const response = await axios.post(
+            "https://portal.insuremo.com/api/platform/1.0/v1/flow/Gry_QueryPolicyByNumber",
+            {
+                policyNumber: policyNumber
+            },
+            {
+                headers: {
+                    "Authorization": "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
+                    "Content-Type": "application/json"
+                }
+            }
         );
 
+        const data =
+            response.data.policy.policyInfo.policyBasicInfo;
+
+        res.json({
+            result: response.data.result,
+            policyNumber: data.policyNumber,
+            policyId: data.policyId,
+            productCode: data.productCode,
+            inceptionDate: data.inceptionDate,
+            expiryDate: data.expiryDate,
+            issueDate: data.issueDate,
+            currency: data.premiumCurrencyCode
+        });
+
+    } catch (err) {
+
+        console.log(
+            err.response?.data || err.message
+        );
+
+        res.status(500).json({
+            error: "Policy API Failed"
+        });
+
     }
-
-    else if (incomingMsg === "freelook") {
-
-        twiml.message("Freelook request submitted successfully ✅");
-
-    }
-
-    else if (incomingMsg === "claims") {
-
-        twiml.message("Claim registered successfully ✅");
-
-    }
-
-    else {
-
-        twiml.message("Please type Hi");
-
-    }
-
-    res.writeHead(200, { "Content-Type": "text/xml" });
-    res.end(twiml.toString());
 
 });
 
 app.get("/", (req, res) => {
-    res.send("WhatsApp Bot Running ✅");
+    res.send("Insurance Bot Running ✅");
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on ${PORT}`);
 });
