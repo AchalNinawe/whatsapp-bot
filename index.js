@@ -4,12 +4,18 @@ const axios = require("axios");
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 app.post("/queryPolicy", async (req, res) => {
 
     try {
 
-        const policyNumber = req.body.policyNumber;
+        console.log("BODY:", req.body);
+
+        const policyNumber =
+            String(req.body.policyNumber || "").trim();
+
+        console.log("Policy Number:", policyNumber);
 
         const response = await axios.post(
             "https://portal.insuremo.com/api/platform/1.0/v1/flow/Gry_QueryPolicyByNumber",
@@ -23,6 +29,24 @@ app.post("/queryPolicy", async (req, res) => {
                 }
             }
         );
+
+        console.log(
+            "API RESPONSE:",
+            JSON.stringify(response.data, null, 2)
+        );
+
+        if (
+            !response.data ||
+            !response.data.policy ||
+            !response.data.policy.policyInfo ||
+            !response.data.policy.policyInfo.policyBasicInfo
+        ) {
+
+            return res.status(400).json({
+                error: "Invalid policy response"
+            });
+
+        }
 
         const data =
             response.data.policy.policyInfo.policyBasicInfo;
@@ -41,11 +65,12 @@ app.post("/queryPolicy", async (req, res) => {
     } catch (err) {
 
         console.log(
+            "ERROR:",
             err.response?.data || err.message
         );
 
         res.status(500).json({
-            error: "Policy API Failed"
+            error: err.response?.data || err.message
         });
 
     }
