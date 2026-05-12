@@ -95,11 +95,7 @@ app.post("/freelook", async (req, res) => {
                 effectiveDate: new Date().toISOString(),
                 freelookInput: {
                     freelookReason: 1,
-                    alteredCoverages: [
-                        {
-                            coverageId: 1
-                        }
-                    ]
+                    alteredCoverages: []
                 }
             },
             {
