@@ -329,7 +329,9 @@ app.post('/claimRegistration', async (req, res) => {
     );
 
     const text =
-      req.body.claimFormText || '';
+  decodeURIComponent(
+    req.body.claimFormText || ''
+  );
 
     console.log(
       'RAW claimFormText:',
