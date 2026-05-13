@@ -250,63 +250,6 @@ try {
 
 });
 
-app.post("/claimRegistration", async (req, res) => {
-
-try {
-
-    console.log(
-        "CLAIM REGISTRATION BODY:",
-        JSON.stringify(req.body, null, 2)
-    );
-
-    const response = await axios.post(
-        "https://portal.insuremo.com/api/platform/1.0/v1/flow/ClaimRegistrationSubmitBusinessApi",
-        req.body,
-        {
-            headers: {
-                "Authorization":
-                    "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
-                "Content-Type":
-                    "application/json"
-            }
-        }
-    );
-
-    console.log(
-        "CLAIM REGISTRATION RESPONSE:",
-        JSON.stringify(
-            response.data,
-            null,
-            2
-        )
-    );
-
-    const data = response.data;
-
-    res.json({
-        success: data.success,
-        message: data.message,
-        caseNo: data.caseNo,
-        caseId: data.caseId
-    });
-
-} catch (err) {
-
-    console.log(
-        "CLAIM REGISTRATION ERROR:",
-        err.response?.data || err.message
-    );
-
-    res.status(500).json({
-        error:
-            err.response?.data ||
-            err.message
-    });
-
-}
-
-});
-
 app.post("/claimReject", async (req, res) => {
 
 try {
@@ -367,8 +310,31 @@ app.post('/claimRegistration', async (req, res) => {
 
   try{
 
+    console.log(
+      '\n=============================='
+    );
+
+    console.log(
+      'CLAIM REGISTRATION START'
+    );
+
+    console.log(
+      'TIME:',
+      new Date().toISOString()
+    );
+
+    console.log(
+      'RAW BODY:',
+      JSON.stringify(req.body,null,2)
+    );
+
     const text =
       req.body.claimFormText || '';
+
+    console.log(
+      'RAW claimFormText:',
+      text
+    );
 
     const insuredName =
       text.match(
@@ -395,6 +361,10 @@ app.post('/claimRegistration', async (req, res) => {
         /Reporter Name:\s*(.*)/i
       )?.[1]?.trim() || '';
 
+    console.log(
+      '\nPARSED VALUES:'
+    );
+
     console.log({
       insuredName,
       insuredIdNo,
@@ -403,27 +373,182 @@ app.post('/claimRegistration', async (req, res) => {
       reporterName
     });
 
+    if(
+      !insuredName ||
+      !incidentDate ||
+      !notificationDate
+    ){
+
+      console.log(
+        'VALIDATION FAILED'
+      );
+
+      return res.status(400).json({
+        success:false,
+        message:'Missing required fields'
+      });
+    }
+
+    const payload = {
+
+      claimCase: {
+
+        claimCaseBasic: {
+
+          claimType:11,
+          claimNature:1,
+          claimChannel:1,
+
+          accidentTime:
+            incidentDate +
+            'T00:00:00Z',
+
+          caseLevel:'1',
+
+          notificationDate:
+            notificationDate +
+            'T00:00:00Z',
+
+          originalCaseNo:''
+
+        },
+
+        claimInsured: {
+
+          partyId:27723919,
+
+          firstName:
+            insuredName,
+
+          lastName:
+            insuredName,
+
+          fullName:
+            insuredName,
+
+          gender:'M',
+
+          dob:'1996-03-31',
+
+          idType:3,
+
+          idNo:
+            insuredIdNo,
+
+          nameFormat:'O'
+
+        },
+
+        claimReporter: {
+
+          partyId:27723919,
+          addressId:1257214
+
+        },
+
+        claimComments:[
+          {
+            commentType:1,
+            commentsText:
+              'Claim registered via WhatsApp'
+          }
+        ]
+
+      }
+
+    };
+
+    console.log(
+      '\nFINAL INSUREMO PAYLOAD:'
+    );
+
+    console.log(
+      JSON.stringify(payload,null,2)
+    );
+
+    console.log(
+      '\nCALLING INSUREMO API...'
+    );
+
+    const response =
+      await axios.post(
+        'https://portal.insuremo.com/api/platform/1.0/v1/flow/ClaimRegistrationSubmitBusinessApi',
+        payload,
+        {
+          headers:{
+            Authorization:
+              'Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys',
+            'Content-Type':
+              'application/json'
+          }
+        }
+      );
+
+    console.log(
+      '\nINSUREMO RESPONSE STATUS:',
+      response.status
+    );
+
+    console.log(
+      '\nINSUREMO RESPONSE BODY:'
+    );
+
+    console.log(
+      JSON.stringify(
+        response.data,
+        null,
+        2
+      )
+    );
+
+    console.log(
+      '\nCLAIM REGISTRATION SUCCESS'
+    );
+
+    console.log(
+      '==============================\n'
+    );
+
+    const data =
+      response.data;
+
     return res.json({
-      success:true,
-      insuredName,
-      insuredIdNo,
-      incidentDate,
-      notificationDate,
-      reporterName
+
+      success:data.success,
+      message:data.message,
+      caseNo:data.caseNo,
+      caseId:data.caseId
+
     });
 
   }catch(error){
 
-    console.error(error);
+    console.log(
+      '\nCLAIM REGISTRATION ERROR'
+    );
+
+    console.error(
+      error.response?.data ||
+      error.message
+    );
+
+    console.log(
+      '==============================\n'
+    );
 
     return res.status(500).json({
+
       success:false,
-      message:error.message
+
+      error:
+        error.response?.data ||
+        error.message
+
     });
+
   }
 
 });
-
 app.get("/", (req, res) => {
     res.send("Insurance Bot Running ✅");
 });
