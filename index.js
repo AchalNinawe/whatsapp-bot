@@ -363,6 +363,67 @@ try {
 
 });
 
+app.post('/claimRegistration', async (req, res) => {
+
+  try{
+
+    const text =
+      req.body.claimFormText || '';
+
+    const insuredName =
+      text.match(
+        /Insured Name:\s*(.*)/i
+      )?.[1]?.trim() || '';
+
+    const insuredIdNo =
+      text.match(
+        /Insured ID No:\s*(.*)/i
+      )?.[1]?.trim() || '';
+
+    const incidentDate =
+      text.match(
+        /Incident Date:\s*(.*)/i
+      )?.[1]?.trim() || '';
+
+    const notificationDate =
+      text.match(
+        /Notification Date:\s*(.*)/i
+      )?.[1]?.trim() || '';
+
+    const reporterName =
+      text.match(
+        /Reporter Name:\s*(.*)/i
+      )?.[1]?.trim() || '';
+
+    console.log({
+      insuredName,
+      insuredIdNo,
+      incidentDate,
+      notificationDate,
+      reporterName
+    });
+
+    return res.json({
+      success:true,
+      insuredName,
+      insuredIdNo,
+      incidentDate,
+      notificationDate,
+      reporterName
+    });
+
+  }catch(error){
+
+    console.error(error);
+
+    return res.status(500).json({
+      success:false,
+      message:error.message
+    });
+  }
+
+});
+
 app.get("/", (req, res) => {
     res.send("Insurance Bot Running ✅");
 });
