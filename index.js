@@ -250,6 +250,118 @@ try {
 
 });
 
+app.post("/claimRegistration", async (req, res) => {
+
+try {
+
+    console.log(
+        "CLAIM REGISTRATION BODY:",
+        JSON.stringify(req.body, null, 2)
+    );
+
+    const response = await axios.post(
+        "https://portal.insuremo.com/api/platform/1.0/v1/flow/ClaimRegistrationSubmitBusinessApi",
+        req.body,
+        {
+            headers: {
+                "Authorization":
+                    "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
+                "Content-Type":
+                    "application/json"
+            }
+        }
+    );
+
+    console.log(
+        "CLAIM REGISTRATION RESPONSE:",
+        JSON.stringify(
+            response.data,
+            null,
+            2
+        )
+    );
+
+    const data = response.data;
+
+    res.json({
+        success: data.success,
+        message: data.message,
+        caseNo: data.caseNo,
+        caseId: data.caseId
+    });
+
+} catch (err) {
+
+    console.log(
+        "CLAIM REGISTRATION ERROR:",
+        err.response?.data || err.message
+    );
+
+    res.status(500).json({
+        error:
+            err.response?.data ||
+            err.message
+    });
+
+}
+
+});
+
+app.post("/claimReject", async (req, res) => {
+
+try {
+
+    console.log(
+        "CLAIM REJECT BODY:",
+        JSON.stringify(req.body, null, 2)
+    );
+
+    const response = await axios.post(
+        "https://portal.insuremo.com/api/platform/1.0/v1/flow/ClaimRegistrationRejectBusinessApi",
+        req.body,
+        {
+            headers: {
+                "Authorization":
+                    "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
+                "Content-Type":
+                    "application/json"
+            }
+        }
+    );
+
+    console.log(
+        "CLAIM REJECT RESPONSE:",
+        JSON.stringify(
+            response.data,
+            null,
+            2
+        )
+    );
+
+    const data = response.data;
+
+    res.json({
+        success: data.success,
+        message: data.message,
+        caseNo: data.caseNo
+    });
+
+} catch (err) {
+
+    console.log(
+        "CLAIM REJECT ERROR:",
+        err.response?.data || err.message
+    );
+
+    res.status(500).json({
+        error:
+            err.response?.data ||
+            err.message
+    });
+
+}
+
+});
 
 app.get("/", (req, res) => {
     res.send("Insurance Bot Running ✅");
