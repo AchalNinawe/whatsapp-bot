@@ -328,40 +328,35 @@ app.post('/claimRegistration', async (req, res) => {
       JSON.stringify(req.body,null,2)
     );
 
-    const text =
-  decodeURIComponent(
-    req.body.claimFormText || ''
-  );
+const text =
+  req.body.claimFormText || '';
 
-    console.log(
-      'RAW claimFormText:',
-      text
-    );
+console.log(
+  'RAW claimFormText:',
+  JSON.stringify(text)
+);
 
-    const insuredName =
-      text.match(
-        /Insured Name:\s*(.*)/i
-      )?.[1]?.trim() || '';
+const lines =
+  text
+    .split(/\r?\n/)
+    .map(line => line.trim());
 
-    const insuredIdNo =
-      text.match(
-        /Insured ID No:\s*(.*)/i
-      )?.[1]?.trim() || '';
+console.log('LINES:', lines);
 
-    const incidentDate =
-      text.match(
-        /Incident Date:\s*(.*)/i
-      )?.[1]?.trim() || '';
+const insuredName =
+  lines[0]?.split(':')[1]?.trim() || '';
 
-    const notificationDate =
-      text.match(
-        /Notification Date:\s*(.*)/i
-      )?.[1]?.trim() || '';
+const insuredIdNo =
+  lines[1]?.split(':')[1]?.trim() || '';
 
-    const reporterName =
-      text.match(
-        /Reporter Name:\s*(.*)/i
-      )?.[1]?.trim() || '';
+const incidentDate =
+  lines[2]?.split(':')[1]?.trim() || '';
+
+const notificationDate =
+  lines[3]?.split(':')[1]?.trim() || '';
+
+const reporterName =
+  lines[4]?.split(':')[1]?.trim() || '';
 
     console.log(
       '\nPARSED VALUES:'
