@@ -83,136 +83,173 @@ app.post("/queryPolicy", async (req, res) => {
 
 app.post("/freelook", async (req, res) => {
 
-    try {
+try {
 
-        const policyNumber =
-            String(
-                req.body.policyNumber ||
-                req.body.policyNo ||
-                ""
-            ).trim();
+    console.log("BODY:", req.body);
 
-        const response = await axios.post(
-            "https://portal.insuremo.com/api/platform/1.0/v1/flow/FreeLookTrad",
-            {
-                policyNumber: policyNumber,
-                effectiveDate: new Date()
-                    .toISOString()
-                    .replace("Z", "")
-                    .split(".")[0],
-                freelookInput: {
-                    freelookReason: 1,
-                    alteredCoverages: []
-                }
-            },
-            {
-                headers: {
-                    "Authorization":
-                        "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
-                    "Content-Type": "application/json"
-                }
+    const policyNumber =
+        String(
+            req.body.policyNumber ||
+            req.body.policyNo ||
+            ""
+        ).trim();
+
+    console.log("Policy Number:", policyNumber);
+
+    const response = await axios.post(
+        "https://portal.insuremo.com/api/platform/1.0/v1/flow/FreeLookTrad",
+        {
+            policyNumber: policyNumber,
+            effectiveDate: new Date()
+                .toISOString()
+                .replace("Z", "")
+                .split(".")[0],
+            freelookInput: {
+                freelookReason: 1,
+                alteredCoverages: []
             }
-        );
+        },
+        {
+            headers: {
+                "Authorization":
+                    "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
+                "Content-Type": "application/json"
+            }
+        }
+    );
 
-        console.log(
-            "FREELOOK RESPONSE:",
-            JSON.stringify(response.data, null, 2)
-        );
+    console.log(
+        "FREELOOK RESPONSE:",
+        JSON.stringify(response.data, null, 2)
+    );
 
-        const data = response.data;
+    const data = response.data;
 
-        res.json({
-            message: "Freelook processed successfully ✅",
-            policyNumber: data.Policy.PolicyNumber,
-            refundAmount:
-                data.FreelookResult.TotalRefundAmount,
-            productCode: data.Policy.ProductCode,
-            inceptionDate: data.Policy.InceptionDate,
-            expiryDate: data.Policy.ExpiryDate
-        });
+    // BUSINESS ERROR RESPONSE
+    if (data.result === 0) {
 
-    } catch (err) {
-
-        console.log(
-            "FREELOOK ERROR:",
-            err.response?.data || err.message
-        );
-
-        res.status(500).json({
-            error:
-                err.response?.data || "Freelook API Failed"
+        return res.json({
+            result: 0,
+            message: data.message
         });
 
     }
+
+    // SUCCESS RESPONSE
+    res.json({
+        result: 1,
+        message: "Freelook processed successfully ✅",
+        policyNumber:
+            data.Policy?.PolicyNumber,
+        refundAmount:
+            data.FreelookResult?.TotalRefundAmount,
+        productCode:
+            data.Policy?.ProductCode,
+        inceptionDate:
+            data.Policy?.InceptionDate,
+        expiryDate:
+            data.Policy?.ExpiryDate
+    });
+
+} catch (err) {
+
+    console.log(
+        "FREELOOK ERROR:",
+        err.response?.data || err.message
+    );
+
+    res.status(500).json({
+        error:
+            err.response?.data ||
+            err.message
+    });
+
+}
 
 });
 
 app.post("/freelookQuotation", async (req, res) => {
 
-    try {
+try {
 
-        const policyNumber =
-            String(
-                req.body.policyNumber ||
-                req.body.policyNo ||
-                ""
-            ).trim();
+    console.log("BODY:", req.body);
 
-        const response = await axios.post(
-            "https://portal.insuremo.com/api/platform/1.0/v1/flow/FreelookRefundQuotation",
-            {
-                policyNumber: policyNumber,
-                effectiveDate: new Date()
-                    .toISOString()
-                    .replace("Z", "")
-                    .split(".")[0],
-                freelookInput: {
-                    freelookReason: 1,
-                    alteredCoverages: []
-                }
-            },
-            {
-                headers: {
-                    "Authorization":
-                        "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
-                    "Content-Type": "application/json"
-                }
+    const policyNumber =
+        String(
+            req.body.policyNumber ||
+            req.body.policyNo ||
+            ""
+        ).trim();
+
+    console.log("Policy Number:", policyNumber);
+
+    const response = await axios.post(
+        "https://portal.insuremo.com/api/platform/1.0/v1/flow/FreelookRefundQuotation",
+        {
+            policyNumber: policyNumber,
+            effectiveDate: new Date()
+                .toISOString()
+                .replace("Z", "")
+                .split(".")[0],
+            freelookInput: {
+                freelookReason: 1,
+                alteredCoverages: []
             }
-        );
+        },
+        {
+            headers: {
+                "Authorization":
+                    "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
+                "Content-Type": "application/json"
+            }
+        }
+    );
 
-        console.log(
-            "FREELOOK QUOTATION RESPONSE:",
-            JSON.stringify(response.data, null, 2)
-        );
+    console.log(
+        "FREELOOK QUOTATION RESPONSE:",
+        JSON.stringify(response.data, null, 2)
+    );
 
-        const data = response.data;
+    const data = response.data;
 
-        res.json({
-            result: data.result,
-            totalCoverageRefund:
-                data.totalCoverageRefund,
-            totalAdminFee:
-                data.totalAdminFee,
-            totalRefundAmount:
-                data.totalRefundAmount
-        });
+    // BUSINESS ERROR
+    if (data.result === 0) {
 
-    } catch (err) {
-
-        console.log(
-            "FREELOOK QUOTATION ERROR:",
-            err.response?.data || err.message
-        );
-
-        res.status(500).json({
-            error:
-                err.response?.data ||
-                "Freelook Quotation API Failed"
+        return res.json({
+            result: 0,
+            message: data.message
         });
 
     }
 
+    // SUCCESS
+    res.json({
+        result: data.result,
+        totalCoverageRefund:
+            data.totalCoverageRefund || 0,
+        totalAdminFee:
+            data.totalAdminFee || 0,
+        totalRefundAmount:
+            data.totalRefundAmount || 0
+    });
+
+} catch (err) {
+
+    console.log(
+        "FREELOOK QUOTATION ERROR:",
+        err.response?.data || err.message
+    );
+
+    res.status(500).json({
+        error:
+            err.response?.data ||
+            err.message
+    });
+
+}
+
 });
+
 
 app.get("/", (req, res) => {
     res.send("Insurance Bot Running ✅");
