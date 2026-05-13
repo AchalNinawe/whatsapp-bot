@@ -328,8 +328,19 @@ app.post('/claimRegistration', async (req, res) => {
       JSON.stringify(req.body,null,2)
     );
 
+const rawBody =
+  req.body.body || '';
+
+console.log(
+  'RAW BODY STRING:',
+  rawBody
+);
+
 const text =
-  req.body.claimFormText || '';
+  rawBody.replace(
+    'claimFormText=',
+    ''
+  );
 
 console.log(
   'RAW claimFormText:',
