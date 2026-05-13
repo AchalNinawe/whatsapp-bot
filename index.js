@@ -549,6 +549,369 @@ app.post('/claimRegistration', async (req, res) => {
   }
 
 });
+
+app.post('/claimAcceptance', async (req, res) => {
+
+  try{
+
+    console.log(
+      '\n=============================='
+    );
+
+    console.log(
+      'CLAIM ACCEPTANCE START'
+    );
+
+    console.log(
+      'BODY:',
+      JSON.stringify(req.body,null,2)
+    );
+
+    const caseId =
+      req.body.caseId;
+
+    const caseNo =
+      req.body.caseNo;
+
+    if(
+      !caseId ||
+      !caseNo
+    ){
+
+      return res.status(400).json({
+        success:false,
+        message:'caseId and caseNo required'
+      });
+    }
+
+    /*
+    ==================================================
+    1. QUERY BUSINESS API
+    ==================================================
+    */
+
+    console.log(
+      '\n1. CLAIM QUERY BUSINESS API'
+    );
+
+    const queryResponse =
+      await axios.post(
+        'https://portal.insuremo.com/api/platform/1.0/v1/flow/ClaimCaseQueryBusinessAPI',
+        {
+          claimCaseNo:caseNo
+        },
+        {
+          headers:{
+            Authorization:
+              'Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys',
+            'Content-Type':
+              'application/json'
+          }
+        }
+      );
+
+    console.log(
+      JSON.stringify(
+        queryResponse.data,
+        null,
+        2
+      )
+    );
+
+    const claimCase =
+      queryResponse.data.claimCase;
+
+    /*
+    ==================================================
+    2. LOAD ACCEPTANCE
+    ==================================================
+    */
+
+    console.log(
+      '\n2. LOAD ACCEPTANCE'
+    );
+
+    const loadResponse =
+      await axios.post(
+        'https://portal.insuremo.com/api/platform/1.0/v1/flow/claim/acceptance/v2/load',
+        {
+          caseId:caseId
+        },
+        {
+          headers:{
+            Authorization:
+              'Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys',
+            'Content-Type':
+              'application/json'
+          }
+        }
+      );
+
+    console.log(
+      JSON.stringify(
+        loadResponse.data,
+        null,
+        2
+      )
+    );
+
+    /*
+    ==================================================
+    3. SAVE BUSINESS API
+    ==================================================
+    */
+
+    console.log(
+      '\n3. CLAIM CASE SAVE BUSINESS API'
+    );
+
+    const savePayload = {
+
+      claimCase:claimCase
+
+    };
+
+    const saveResponse =
+      await axios.post(
+        'https://portal.insuremo.com/api/platform/1.0/v1/flow/ClaimCaseSaveBusinessAPI',
+        savePayload,
+        {
+          headers:{
+            Authorization:
+              'Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys',
+            'Content-Type':
+              'application/json'
+          }
+        }
+      );
+
+    console.log(
+      JSON.stringify(
+        saveResponse.data,
+        null,
+        2
+      )
+    );
+
+    /*
+    ==================================================
+    4. COPY POLICIES
+    ==================================================
+    */
+
+    console.log(
+      '\n4. COPY POLICIES'
+    );
+
+    const insuredPartyId =
+      claimCase
+      ?.claimInsured
+      ?.partyId;
+
+    const accidentTime =
+      claimCase
+      ?.claimCaseBasic
+      ?.accidentTime;
+
+    const copyPoliciesPayload = {
+
+      caseId:
+        caseId,
+
+      insuredPartyId:
+        insuredPartyId,
+
+      accidentTime:
+        accidentTime
+
+    };
+
+    console.log(
+      JSON.stringify(
+        copyPoliciesPayload,
+        null,
+        2
+      )
+    );
+
+    const copyPoliciesResponse =
+      await axios.post(
+        'https://portal.insuremo.com/api/platform/1.0/v1/flow/claim/acceptance/v2/copyPolicies',
+        copyPoliciesPayload,
+        {
+          headers:{
+            Authorization:
+              'Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys',
+            'Content-Type':
+              'application/json'
+          }
+        }
+      );
+
+    console.log(
+      JSON.stringify(
+        copyPoliciesResponse.data,
+        null,
+        2
+      )
+    );
+
+    /*
+    ==================================================
+    5. SAVE POLICY PRODUCT
+    ==================================================
+    */
+
+    console.log(
+      '\n5. SAVE POLICY PRODUCT'
+    );
+
+    const savePolicyResponse =
+      await axios.post(
+        'https://portal.insuremo.com/api/platform/1.0/v1/flow/claim/acceptance/v2/savePolicyProduct',
+        {
+          caseId:caseId
+        },
+        {
+          headers:{
+            Authorization:
+              'Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys',
+            'Content-Type':
+              'application/json'
+          }
+        }
+      );
+
+    console.log(
+      JSON.stringify(
+        savePolicyResponse.data,
+        null,
+        2
+      )
+    );
+
+    /*
+    ==================================================
+    6. SUBMIT ACCEPTANCE
+    ==================================================
+    */
+
+    console.log(
+      '\n6. SUBMIT ACCEPTANCE'
+    );
+
+    const submitPayload = {
+
+      caseId:
+        caseId,
+
+      acceptDecision:1,
+
+      commentsToClient:
+        'Accepted via WhatsApp'
+
+    };
+
+    console.log(
+      JSON.stringify(
+        submitPayload,
+        null,
+        2
+      )
+    );
+
+    const submitResponse =
+      await axios.post(
+        'https://portal.insuremo.com/api/platform/1.0/v1/flow/claim/acceptance/v2/submit',
+        submitPayload,
+        {
+          headers:{
+            Authorization:
+              'Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys',
+            'Content-Type':
+              'application/json'
+          }
+        }
+      );
+
+    console.log(
+      JSON.stringify(
+        submitResponse.data,
+        null,
+        2
+      )
+    );
+
+    console.log(
+      '\nCLAIM ACCEPTANCE COMPLETE'
+    );
+
+    console.log(
+      '==============================\n'
+    );
+
+    return res.json({
+
+      success:true,
+
+      message:
+        'Claim accepted successfully',
+
+      caseId:
+        caseId,
+
+      caseNo:
+        caseNo,
+
+      query:
+        queryResponse.data,
+
+      load:
+        loadResponse.data,
+
+      save:
+        saveResponse.data,
+
+      copyPolicies:
+        copyPoliciesResponse.data,
+
+      savePolicyProduct:
+        savePolicyResponse.data,
+
+      submit:
+        submitResponse.data
+
+    });
+
+  }catch(error){
+
+    console.log(
+      '\nCLAIM ACCEPTANCE ERROR'
+    );
+
+    console.error(
+      error.response?.data ||
+      error.message
+    );
+
+    console.log(
+      '==============================\n'
+    );
+
+    return res.status(500).json({
+
+      success:false,
+
+      error:
+        error.response?.data ||
+        error.message
+
+    });
+
+  }
+
+});
+
 app.get("/", (req, res) => {
     res.send("Insurance Bot Running ✅");
 });
