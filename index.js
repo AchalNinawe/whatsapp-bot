@@ -920,14 +920,6 @@ app.post('/claimAcceptance', async (req, res) => {
 
 });
 
-const express = require("express");
-const axios = require("axios");
-
-const app = express();
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
 const BASE_URL =
   "https://portal.insuremo.com/api/platform/1.0/v1";
 
@@ -1272,31 +1264,6 @@ app.post("/claim/submitAcceptance", async (req, res) => {
     });
 
   }
-
-});
-
-/*
-==================================================
-HEALTH CHECK
-==================================================
-*/
-
-app.get("/", (req, res) => {
-
-  res.send(
-    "Claim Acceptance APIs Running ✅"
-  );
-
-});
-
-const PORT =
-  process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-
-  console.log(
-    `Server running on ${PORT}`
-  );
 
 });
 
