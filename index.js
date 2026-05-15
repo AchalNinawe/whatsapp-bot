@@ -920,6 +920,386 @@ app.post('/claimAcceptance', async (req, res) => {
 
 });
 
+const express = require("express");
+const axios = require("axios");
+
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+const BASE_URL =
+  "https://portal.insuremo.com/api/platform/1.0/v1";
+
+const HEADERS = {
+  Authorization:
+    "Bearer MOATbu0LChDwAdlbynYOegcshxYsyRys",
+  "Content-Type": "application/json"
+};
+
+/*
+==================================================
+1. CLAIM QUERY
+==================================================
+*/
+
+app.post("/claim/query", async (req, res) => {
+
+  try {
+
+    const caseNo = req.body.caseNo;
+
+    if (!caseNo) {
+
+      return res.status(400).json({
+        success: false,
+        message: "caseNo required"
+      });
+
+    }
+
+    const response = await axios.post(
+      `${BASE_URL}/flow/ClaimCaseQueryBusinessAPI`,
+      {
+        claimCaseNo: caseNo
+      },
+      {
+        headers: HEADERS
+      }
+    );
+
+    return res.json({
+      success: true,
+      data: response.data
+    });
+
+  } catch (error) {
+
+    console.log(
+      error.response?.data || error.message
+    );
+
+    return res.status(500).json({
+      success: false,
+      error:
+        error.response?.data ||
+        error.message
+    });
+
+  }
+
+});
+
+/*
+==================================================
+2. LOAD ACCEPTANCE
+==================================================
+*/
+
+app.post("/claim/loadAcceptance", async (req, res) => {
+
+  try {
+
+    const caseId = req.body.caseId;
+
+    if (!caseId) {
+
+      return res.status(400).json({
+        success: false,
+        message: "caseId required"
+      });
+
+    }
+
+    const response = await axios.post(
+      `${BASE_URL}/flow/claim/acceptance/v2/load`,
+      {
+        caseId: caseId
+      },
+      {
+        headers: HEADERS
+      }
+    );
+
+    return res.json({
+      success: true,
+      data: response.data
+    });
+
+  } catch (error) {
+
+    console.log(
+      error.response?.data || error.message
+    );
+
+    return res.status(500).json({
+      success: false,
+      error:
+        error.response?.data ||
+        error.message
+    });
+
+  }
+
+});
+
+/*
+==================================================
+3. SAVE CLAIM CASE
+==================================================
+*/
+
+app.post("/claim/saveCase", async (req, res) => {
+
+  try {
+
+    const claimCase = req.body.claimCase;
+
+    if (!claimCase) {
+
+      return res.status(400).json({
+        success: false,
+        message: "claimCase required"
+      });
+
+    }
+
+    const response = await axios.post(
+      `${BASE_URL}/flow/ClaimCaseSaveBusinessAPI`,
+      {
+        claimCase: claimCase
+      },
+      {
+        headers: HEADERS
+      }
+    );
+
+    return res.json({
+      success: true,
+      data: response.data
+    });
+
+  } catch (error) {
+
+    console.log(
+      error.response?.data || error.message
+    );
+
+    return res.status(500).json({
+      success: false,
+      error:
+        error.response?.data ||
+        error.message
+    });
+
+  }
+
+});
+
+/*
+==================================================
+4. COPY POLICIES
+==================================================
+*/
+
+app.post("/claim/copyPolicies", async (req, res) => {
+
+  try {
+
+    const {
+      caseId,
+      insuredPartyId,
+      accidentTime
+    } = req.body;
+
+    if (
+      !caseId ||
+      !insuredPartyId ||
+      !accidentTime
+    ) {
+
+      return res.status(400).json({
+        success: false,
+        message:
+          "caseId, insuredPartyId, accidentTime required"
+      });
+
+    }
+
+    const response = await axios.post(
+      `${BASE_URL}/flow/claim/acceptance/v2/copyPolicies`,
+      {
+        caseId,
+        insuredPartyId,
+        accidentTime
+      },
+      {
+        headers: HEADERS
+      }
+    );
+
+    return res.json({
+      success: true,
+      data: response.data
+    });
+
+  } catch (error) {
+
+    console.log(
+      error.response?.data || error.message
+    );
+
+    return res.status(500).json({
+      success: false,
+      error:
+        error.response?.data ||
+        error.message
+    });
+
+  }
+
+});
+
+/*
+==================================================
+5. SAVE POLICY PRODUCT
+==================================================
+*/
+
+app.post("/claim/savePolicyProduct", async (req, res) => {
+
+  try {
+
+    const caseId = req.body.caseId;
+
+    if (!caseId) {
+
+      return res.status(400).json({
+        success: false,
+        message: "caseId required"
+      });
+
+    }
+
+    const response = await axios.post(
+      `${BASE_URL}/flow/claim/acceptance/v2/savePolicyProduct`,
+      {
+        caseId: caseId
+      },
+      {
+        headers: HEADERS
+      }
+    );
+
+    return res.json({
+      success: true,
+      data: response.data
+    });
+
+  } catch (error) {
+
+    console.log(
+      error.response?.data || error.message
+    );
+
+    return res.status(500).json({
+      success: false,
+      error:
+        error.response?.data ||
+        error.message
+    });
+
+  }
+
+});
+
+/*
+==================================================
+6. SUBMIT ACCEPTANCE
+==================================================
+*/
+
+app.post("/claim/submitAcceptance", async (req, res) => {
+
+  try {
+
+    const {
+      caseId,
+      acceptDecision,
+      commentsToClient
+    } = req.body;
+
+    if (!caseId) {
+
+      return res.status(400).json({
+        success: false,
+        message: "caseId required"
+      });
+
+    }
+
+    const response = await axios.post(
+      `${BASE_URL}/flow/claim/acceptance/v2/submit`,
+      {
+        caseId: caseId,
+        acceptDecision:
+          acceptDecision || 1,
+        commentsToClient:
+          commentsToClient ||
+          "Accepted via API"
+      },
+      {
+        headers: HEADERS
+      }
+    );
+
+    return res.json({
+      success: true,
+      data: response.data
+    });
+
+  } catch (error) {
+
+    console.log(
+      error.response?.data || error.message
+    );
+
+    return res.status(500).json({
+      success: false,
+      error:
+        error.response?.data ||
+        error.message
+    });
+
+  }
+
+});
+
+/*
+==================================================
+HEALTH CHECK
+==================================================
+*/
+
+app.get("/", (req, res) => {
+
+  res.send(
+    "Claim Acceptance APIs Running ✅"
+  );
+
+});
+
+const PORT =
+  process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+
+  console.log(
+    `Server running on ${PORT}`
+  );
+
+});
+
 app.get("/", (req, res) => {
     res.send("Insurance Bot Running ✅");
 });
