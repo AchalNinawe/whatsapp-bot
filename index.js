@@ -1043,16 +1043,21 @@ app.post("/claim/saveCase", async (req, res) => {
 
   try {
 
-    const claimCase = req.body.claimCase;
+const claimCase =
+  req.body.claimCase ||
+  req.body;
 
-    if (!claimCase) {
+if (
+  !claimCase ||
+  !claimCase.claimInsured
+) {
 
-      return res.status(400).json({
-        success: false,
-        message: "claimCase required"
-      });
+  return res.status(400).json({
+    success: false,
+    message: "invalid claimCase"
+  });
 
-    }
+}
 
     const response = await axios.post(
       `${BASE_URL}/flow/ClaimCaseSaveBusinessAPI`,
