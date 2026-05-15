@@ -352,22 +352,20 @@ const lines =
     .split(/\r?\n/)
     .map(line => line.trim());
 
-console.log('LINES:', lines);
-
 const insuredName =
-  lines[0]?.split(':')[1]?.trim() || '';
+  text.match(/Insured Name:\s*(.*)/i)?.[1]?.trim() || '';
 
 const insuredIdNo =
-  lines[1]?.split(':')[1]?.trim() || '';
+  text.match(/Insured ID No:\s*(.*)/i)?.[1]?.trim() || '';
 
 const incidentDate =
-  lines[2]?.split(':')[1]?.trim() || '';
+  text.match(/Incident Date:\s*(.*)/i)?.[1]?.trim() || '';
 
 const notificationDate =
-  lines[3]?.split(':')[1]?.trim() || '';
+  text.match(/Notification Date:\s*(.*)/i)?.[1]?.trim() || '';
 
 const reporterName =
-  lines[4]?.split(':')[1]?.trim() || '';
+  text.match(/Reporter Name:\s*(.*)/i)?.[1]?.trim() || '';
 
     console.log(
       '\nPARSED VALUES:'
