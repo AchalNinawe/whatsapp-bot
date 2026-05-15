@@ -1043,21 +1043,34 @@ app.post("/claim/saveCase", async (req, res) => {
 
   try {
 
-const claimCase =
-  req.body.claimCase ||
-  req.body;
+    console.log(
+      "SAVE CASE BODY:",
+      JSON.stringify(req.body, null, 2)
+    );
 
-if (
-  !claimCase ||
-  !claimCase.claimInsured
-) {
+    let claimCase = req.body;
 
-  return res.status(400).json({
-    success: false,
-    message: "invalid claimCase"
-  });
+    // if Twilio sends stringified JSON
+    if (typeof claimCase === "string") {
+      claimCase = JSON.parse(claimCase);
+    }
 
-}
+    // if wrapped inside claimCase
+    if (claimCase.claimCase) {
+      claimCase = claimCase.claimCase;
+    }
+
+    if (
+      !claimCase ||
+      !claimCase.claimInsured
+    ) {
+
+      return res.status(400).json({
+        success: false,
+        message: "invalid claimCase"
+      });
+
+    }
 
     const response = await axios.post(
       `${BASE_URL}/flow/ClaimCaseSaveBusinessAPI`,
@@ -1077,6 +1090,7 @@ if (
   } catch (error) {
 
     console.log(
+      "SAVE CASE ERROR:",
       error.response?.data || error.message
     );
 
@@ -1090,7 +1104,6 @@ if (
   }
 
 });
-
 /*
 ==================================================
 4. COPY POLICIES
